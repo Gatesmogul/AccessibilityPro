@@ -5,10 +5,10 @@
   "main": "expo-router/entry",
   "scripts": {
     "start": "node server.js",
-    "build": "npm install --prefix frontend && npm run build --prefix frontend && npm install --prefix backend",
     "dev": "nodemon server.js",
-    "expo": "expo start"
-  },
+    "expo": "expo start",
+    "build": "npm install && cd app && npm install && npx expo export:web && cd .."
+  }.
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
     "@expo/vector-icons": "~14.0.4",
