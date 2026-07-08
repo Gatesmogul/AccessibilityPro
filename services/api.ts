@@ -12,10 +12,13 @@ const getBaseUrl = (): string => {
   if (__DEV__) {
     // When running locally, Android emulators sandbox localhost to 10.0.2.2 
     // while iOS simulators access machine localhost natively.
+    // NOTE: Changed port to 5001 to match your Render configuration!
     return Platform.OS === 'android' 
-      ? 'http://10.0.2.2:5000/api/v1' 
-      : 'http://localhost:5000/api/v1';
+      ? 'http://10.0.2.2:5001/api/v1' 
+      : 'http://localhost:5001/api/v1';
   }
+  
+  // Change this line to your live Render endpoint link
   return process.env.EXPO_PUBLIC_API_URL || 'https://accessibilitypro.onrender.com/api/v1';
 };
 
