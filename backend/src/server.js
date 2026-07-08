@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const path = require('path'); // Added for absolute directory path resolving
+const path = require('path'); // Absolute directory path resolver
 
 // Core Configuration and Infrastructure Layers
 const db = require('./config/db');
@@ -60,8 +60,8 @@ app.get('/health', async (req, res) => {
  * 3. Expo Web Frontend Static Client Engine Mount
  * ============================================================================
  */
-// A. Serve the raw static files (HTML, JS, CSS) built from your /app workspace directory
-app.use(express.static(path.join(__dirname, '../app/dist')));
+// A. FIX: Serve raw static files straight out of the root project 'dist' directory
+app.use(express.static(path.join(__dirname, 'dist')));
 
 // B. Intercept non-API route page requests to render your React Native screens on the web
 app.get('*', (req, res, next) => {
@@ -69,8 +69,8 @@ app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api') || req.path === '/health') {
     return next();
   }
-  // Deliver the unified single-page application entry point document
-  res.sendFile(path.join(__dirname, '../app/dist/index.html'));
+  // FIX: Deliver the unified front-end entry point from the root 'dist' folder
+  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
 /**
