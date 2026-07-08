@@ -7,7 +7,7 @@
     "start": "node server.js",
     "dev": "nodemon server.js",
     "expo": "expo start",
-    "build": "npm install && cd app && npm install && npx expo export:web && cd .."
+    "build": "npm install && npx expo export:web"
   },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
@@ -53,9 +53,4 @@
     "@babel/core": "^7.25.2",
     "@types/react": "~18.3.12",
     "babel-plugin-module-resolver": "^5.0.2",
-    "typescript": "^5.3.3"
-  },
-  "engines": {
-    "node": ">=18.x"
-  }
-}
+    "typescript": "^
