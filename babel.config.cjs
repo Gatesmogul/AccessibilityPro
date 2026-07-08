@@ -3,13 +3,12 @@ module.exports = function (api) {
   api.cache(true);
   
   return {
-    // 1. Core Framework Core Compilation Pipeline Preset
+    // 1. Core Framework Core Compilation Pipeline Preset (Handles Expo Router internally in SDK 52)
     presets: ['babel-preset-expo'],
     
     // 2. Compilation Plugin Matrix Stack
     plugins: [
-      // Safe injection of Expo Router compilation configurations
-      require.resolve('expo-router/babel'),
+      // FIX: Removed the deprecated require.resolve('expo-router/babel') plugin
 
       // Module Resolver for Clean Absolute Paths (No more complex '../../' imports)
       [
