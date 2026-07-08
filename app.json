@@ -1,0 +1,33 @@
+{
+  "expo": {
+    "name": "AccessibilityPro",
+    "slug": "accessibility-pro",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/AccessibilityPro-Icon.png",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-image.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#FFFFFF"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.accessibilitypro.app",
+      "userInterfaceStyle": "automatic"
+    },
+    "android": {
+      "package": "com.accessibilitypro.app",
+      "userInterfaceStyle": "automatic",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-foreground.jpg", 
+        "backgroundColor": "#FFFFFF"
+      }
+    },
+    "web": {
+      "favicon": "./assets/AccessibilityPro-Icon.png",
+      "bundler": "metro"
+    }
+  }
+}
