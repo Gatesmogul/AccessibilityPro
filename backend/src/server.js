@@ -60,8 +60,8 @@ app.get('/health', async (req, res) => {
  * ============================================================================
  */
 
-// Fallback interceptor catching all unregistered, arbitrary route paths
-app.all('*', (req, res, next) => {
+// FIX: Safe modern regex routing pattern for catch-all parameters in Node.js v26 / Express
+app.all('(.*)', (req, res, next) => {
   next(new AppError(`The requested endpoint resource [${req.method}] ${req.originalUrl} does not exist on this server cluster.`, 404));
 });
 
