@@ -8,7 +8,7 @@
     "dev": "nodemon server.js",
     "expo": "expo start",
     "build": "npm install && cd app && npm install && npx expo export:web && cd .."
-  }.
+  },
   "dependencies": {
     "@expo/metro-runtime": "~4.0.1",
     "@expo/vector-icons": "~14.0.4",
