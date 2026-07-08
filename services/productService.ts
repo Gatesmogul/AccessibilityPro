@@ -1,94 +1,65 @@
-import api from './api';
-import { ProductItem } from '@components/customer/ProductCard'; 
-import { ListingFormData } from '@components/owner/ListingForm'; 
+import api from './api'; // Points directly to your updated api.ts configuration
 
-/**
- * Server Response Wrapper Layouts
- */
-export interface ProductResponse<T> {
+export interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  imageUrl?: string;
+  category?: string;
+  stock?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ProductResponse {
   success: boolean;
-  message: string;
-  data: T;
+  status: string;
+  data?: Product[];
+  products?: Product[];
+  message?: string;
 }
 
 export const productService = {
   /**
-   * Fetch all global listings across the system marketplace index feed.
-   * @param filters - Optional query parameters to isolate specific asset categories or status types.
+   * Fetches all products from the live Render database cluster.
+   * Resolves cleanly to: GET https://accessibilitypro.onrender.com/api/v1/products
    */
-  async getAllProducts(filters?: { category?: string; status?: string }): Promise<ProductItem[]> {
+  getAllProducts: async (): Promise<Product[]> => {
     try {
-      const response = await api.get<ProductResponse<ProductItem[]>>('/products', { params: filters });
-      return response.data.data;
+      // FIX: Using the relative suffix '/products' instead of '/' to avoid hitting the root route
+      const response = await api.get<ProductResponse>('/products');
+      
+      if (response.data && response.data.success) {
+        // Automatically accommodates either 'data' or 'products' array payload wrappers
+        return response.data.data || response.data.products || [];
+      }
+      
+      throw new Error(response.data?.message || 'Failed to extract production product inventory.');
     } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || 
-        'Failed to query the global real estate marketplace index feed.'
-      );
+      console.error('Critical database read error within productService.getAllProducts:', error.message);
+      throw error;
     }
   },
 
   /**
-   * Isolate and retrieve listings managed exclusively by the authenticated Owner/Real Estate Business profile.
+   * Fetches details for a single specific product entity.
+   * Resolves cleanly to: GET https://accessibilitypro.onrender.com/api/v1/products/:id
    */
-  async getOwnerProducts(): Promise<ProductItem[]> {
+  getProductById: async (productId: string): Promise<Product> => {
     try {
-      const response = await api.get<ProductResponse<ProductItem[]>>('/products/owner/listings');
-      return response.data.data;
+      const response = await api.get<{ success: boolean; data: Product }>(`/products/${productId}`);
+      
+      if (response.data && response.data.success) {
+        return response.data.data;
+      }
+      
+      throw new Error('Target product profile metadata record could not be resolved.');
     } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || 
-        'Failed to fetch listings linked to your merchant account token.'
-      );
-    }
-  },
-
-  /**
-   * Provision and automatically publish a brand-new real estate asset onto the platform homepage feed.
-   * @param payload - Structured form dataset gathered from the owner listing entry panels.
-   */
-  async createProduct(payload: ListingFormData): Promise<ProductItem> {
-    try {
-      const response = await api.post<ProductResponse<ProductItem>>('/products', payload);
-      return response.data.data;
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || 
-        'Failed to transmit and host your new structural product record.'
-      );
-    }
-  },
-
-  /**
-   * Modify structural attributes, pricing tiers, or availability states for an existing listing.
-   * @param id - The unique backend asset UUID or database identifier string sequence.
-   * @param payload - Partial data fields requiring patch alterations.
-   */
-  async updateProduct(id: string, payload: Partial<ListingFormData & { availability: string }>): Promise<ProductItem> {
-    try {
-      const response = await api.put<ProductResponse<ProductItem>>(`/products/${id}`, payload);
-      return response.data.data;
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || 
-        `Failed to push configuration alterations to product entry ${id}.`
-      );
-    }
-  },
-
-  /**
-   * Purge an asset listing completely out of the database architecture.
-   * @param id - The unique identifier associated with the targeted property document.
-   */
-  async deleteProduct(id: string): Promise<{ success: boolean; message: string }> {
-    try {
-      const response = await api.delete<{ success: boolean; message: string }>(`/products/${id}`);
-      return response.data;
-    } catch (error: any) {
-      throw new Error(
-        error.response?.data?.message || 
-        'Failed to erase the requested product index record from storage blocks.'
-      );
+      console.error(`Error resolving data matrix parameters for Product ID [${productId}]:`, error.message);
+      throw error;
     }
   }
 };
+
+export default productService;
