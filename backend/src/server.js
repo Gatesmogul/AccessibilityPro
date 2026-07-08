@@ -60,17 +60,18 @@ app.get('/health', async (req, res) => {
  * 3. Expo Web Frontend Static Client Engine Mount
  * ============================================================================
  */
-// A. FIX: Serve raw static files straight out of the root project 'dist' directory
-app.use(express.static(path.join(__dirname, 'dist')));
+// A. FIX: Clamber up two levels ('../../') to find the root 'dist' folder from 'backend/src'
+app.use(express.static(path.join(__dirname, '../../dist')));
 
 // B. Intercept non-API route page requests to render your React Native screens on the web
-app.get('*', (req, res, next) => {
+// FIX: Changed '*' to '(.*)' to completely satisfy new path-to-regexp parsing metrics
+app.get('(.*)', (req, res, next) => {
   // If the inbound request path targets an API gateway route, bypass static hosting rules
   if (req.path.startsWith('/api') || req.path === '/health') {
     return next();
   }
-  // FIX: Deliver the unified front-end entry point from the root 'dist' folder
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+  // FIX: Clamber up two levels ('../../') to safely deliver the main entry frame
+  res.sendFile(path.join(__dirname, '../../dist', 'index.html'));
 });
 
 /**
@@ -80,60 +81,4 @@ app.get('*', (req, res, next) => {
  */
 
 // Pathless middleware fallback interceptor catching all unregistered, arbitrary route paths
-app.use((req, res, next) => {
-  next(new AppError(`The requested endpoint resource [${req.method}] ${req.originalUrl} does not exist on this server cluster.`, 404));
-});
-
-// Load the centralized global exception handler last
-app.use(globalErrorHandler);
-
-/**
- * ============================================================================
- * 5. Cluster Boot-up and Structural Migration Sequencer
- * ============================================================================
- */
-async function initializePlatformServer() {
-  console.log('🔄 Booting AccessibilityPro API backend ecosystem platform...');
-  
-  // Phase A: Assert core socket connectivity with the PostgreSQL cluster
-  const isDatabaseOnline = await db.verifyConnectivity();
-  if (!isDatabaseOnline) {
-    console.error('🚨 Critical startup failure: Database cluster link returned offline status. Halting application launch.');
-    process.exit(1);
-  }
-
-  // Phase B: Execute ordered structural layout validations (Migrations)
-  try {
-    console.log('📦 Enforcing relational schema check matrices across structural models...');
-    
-    // Ordered safely to satisfy foreign key link constraints natively
-    await UserModel.initializeTable();
-    await ProductModel.initializeTable();
-    await CartModel.initializeTable();
-    
-    console.log('✅ All structural entity schema validations verified successfully.');
-  } catch (migrationError) {
-    console.error('🚨 Critical database schema migration sequence crashed:', migrationError.message);
-    process.exit(1);
-  }
-
-  // Phase C: Spin up operational network listeners
-  const serverInstance = app.listen(PORT, () => {
-    console.log(`======================================================================`);
-    console.log(`🚀 RUNNING: Server cluster listening securely on port: ${PORT}`);
-    console.log(`🌐 MODE: Active environment profile context: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`======================================================================`);
-  });
-
-  // Track unhandled asynchronous promise rejections to protect system processes
-  process.on('unhandledRejection', (reason, promise) => {
-    console.error('🚨 CRITICAL UNHANDLED PROMISE REJECTION CAPTURED:', reason);
-    // Gracefully offload connections before killing process loops under panic states
-    serverInstance.close(() => {
-      process.exit(1);
-    });
-  });
-}
-
-// Fire startup initialization engine sequence
-initializePlatformServer();
+app.use((req, res
