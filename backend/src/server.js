@@ -64,7 +64,8 @@ app.get('/health', async (req, res) => {
 app.use(express.static(path.join(__dirname, '../../dist')));
 
 // B. Intercept non-API route page requests to render your React Native screens on the web
-app.get('(.*)', (req, res, next) => {
+// FIX: Swapped out '(.*)' for '/:any*' to adhere to modern route matching constraints
+app.get('/:any*', (req, res, next) => {
   // If the inbound request path targets an API gateway route, bypass static hosting rules
   if (req.path.startsWith('/api') || req.path === '/health') {
     return next();
