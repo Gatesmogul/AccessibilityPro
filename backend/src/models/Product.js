@@ -60,19 +60,6 @@ const Product = {
 
   /**
    * Commits and writes a verified new property listing entry row into storage.
-   * * @param {Object} propertyData
-   * @param {string} propertyData.name - High-level listing title text name
-   * @param {string} propertyData.category - Functional classification context 
-   * @param {number|string} propertyData.price - Asset monetary balance valuation
-   * @param {string} propertyData.status - Listing operational transaction mode ('sell', 'rent', 'lease')
-   * @param {string} propertyData.address - Precise location data line
-   * @param {string} propertyData.city - Metrological municipality zone
-   * @param {string} propertyData.country - National boundary marker
-   * @param {string} [propertyData.gpsLink] - Optional mapping link coordinates
-   * @param {Array<string>} [propertyData.images] - Compiled array of layout photography links
-   * @param {Object} [propertyData.accessibilityFeatures] - Map configurations specifying adaptive features
-   * @param {string} [propertyData.description] - Extended text field specifying property highlights
-   * @param {string} propertyData.ownerId - Account identifier binding the listing to its author
    */
   async create(propertyData) {
     const {
@@ -115,12 +102,6 @@ const Product = {
 
   /**
    * Custom Marketplace Query Engine with Dynamic Filter Matching
-   * Allows searching listings based on dynamic criteria, including complex accessibility filters.
-   * * @param {Object} filters
-   * @param {string} [filters.category] - Filter by asset category
-   * @param {string} [filters.status] - Filter by availability state
-   * @param {string} [filters.city] - Targeted municipal region filter
-   * @param {Array<string>} [filters.requiredAccessibilityFeatures] - Keys that must be flagged true in JSONB data
    */
   async findFiltered(filters = {}) {
     let queryText = 'SELECT * FROM properties WHERE 1=1';
@@ -156,4 +137,10 @@ const Product = {
 
     queryText += ' ORDER BY created_at DESC;';
 
-    const result = await db.query(query
+    // FIX: Using the correct variables (queryText & queryParams) and closing the blocks
+    const result = await db.query(queryText, queryParams);
+    return result.rows;
+  }
+};
+
+module.exports = Product;
