@@ -16,7 +16,7 @@ const getBaseUrl = (): string => {
       ? 'http://10.0.2.2:5000/api/v1' 
       : 'http://localhost:5000/api/v1';
   }
-  return 'https://api.accessibilitypro.com/api/v1';
+  return 'https://api.accessibilitypro.onrender.com/api/v1';
 };
 
 const api: AxiosInstance = axios.create({
