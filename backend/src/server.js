@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const path = require('path'); // Added for absolute directory path resolving
 
 // Core Configuration and Infrastructure Layers
 const db = require('./config/db');
@@ -56,11 +57,29 @@ app.get('/health', async (req, res) => {
 
 /**
  * ============================================================================
- * 3. Post-Routing Error Catching Stack
+ * 3. Expo Web Frontend Static Client Engine Mount
+ * ============================================================================
+ */
+// A. Serve the raw static files (HTML, JS, CSS) built from your /app workspace directory
+app.use(express.static(path.join(__dirname, '../app/dist')));
+
+// B. Intercept non-API route page requests to render your React Native screens on the web
+app.get('*', (req, res, next) => {
+  // If the inbound request path targets an API gateway route, bypass static hosting rules
+  if (req.path.startsWith('/api') || req.path === '/health') {
+    return next();
+  }
+  // Deliver the unified single-page application entry point document
+  res.sendFile(path.join(__dirname, '../app/dist/index.html'));
+});
+
+/**
+ * ============================================================================
+ * 4. Post-Routing Error Catching Stack
  * ============================================================================
  */
 
-// FIX: Pathless middleware fallback interceptor catching all unregistered, arbitrary route paths
+// Pathless middleware fallback interceptor catching all unregistered, arbitrary route paths
 app.use((req, res, next) => {
   next(new AppError(`The requested endpoint resource [${req.method}] ${req.originalUrl} does not exist on this server cluster.`, 404));
 });
@@ -70,7 +89,7 @@ app.use(globalErrorHandler);
 
 /**
  * ============================================================================
- * 4. Cluster Boot-up and Structural Migration Sequencer
+ * 5. Cluster Boot-up and Structural Migration Sequencer
  * ============================================================================
  */
 async function initializePlatformServer() {
