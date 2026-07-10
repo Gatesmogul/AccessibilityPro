@@ -1,78 +1,64 @@
-const jwt = require('jsonwebtoken');
-require('dotenv').config();
-
-const JWT_SECRET = process.env.JWT_SECRET || 'ACCESSIBILITY_PRO_ULTRA_HIDDEN_SECRET_KEY';
+const admin = require('../config/firebaseAdmin');
 
 /**
- * Core Authentication Protection Middleware
- * Intercepts inbound route requests to validate bearer token signatures.
+ * --------------------------------------------------------------------------
+ * Verify Firebase Authentication Token
+ * --------------------------------------------------------------------------
  */
-const protect = async (req, res, next) => {
+
+const verifyFirebaseToken = async (req, res, next) => {
   try {
-    let token;
+    const authHeader = req.headers.authorization;
 
-    // Check for token within the incoming HTTP Authorization Request Header
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-      // Split the string structure ("Bearer <token_string>") to isolate the raw cryptographic signature
-      token = req.headers.authorization.split(' ')[1];
-    }
-
-    if (!token) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({
         success: false,
-        message: 'Access Denied. No authorization token detected in header blocks.'
+        message: 'Authorization token is missing.',
       });
     }
 
-    // Verify token validity against your environment secret key configuration matrix
-    jwt.verify(token, JWT_SECRET, (err, decodedPayload) => {
-      if (err) {
-        // Handle token variations like expired validations gracefully
-        const errorMessage = err.name === 'TokenExpiredError' 
-          ? 'Your active authentication session has expired. Please sign in again.' 
-          : 'Malformed token verification signature. Authorization mapping rejected.';
-        
-        return res.status(401).json({ success: false, message: errorMessage });
-      }
+    const token = authHeader.split(' ')[1];
 
-      /**
-       * Inject decoded user session parameters directly into the downstream request pipeline.
-       * Decoded properties include: user identifier (uid), email address, and role permissions type.
-       */
-      req.user = decodedPayload;
-      
-      // Move execution thread onto the matching controller handler method safely
-      next();
-    });
+    const decodedToken = await admin.auth().verifyIdToken(token);
 
+    req.user = {
+      uid: decodedToken.uid,
+      email: decodedToken.email,
+      emailVerified: decodedToken.email_verified,
+      name: decodedToken.name || '',
+      picture: decodedToken.picture || '',
+    };
+
+    next();
   } catch (error) {
-    console.error('Security authorization middleware tracking process instance exception:', error.message);
-    return res.status(500).json({ 
-      success: false, 
-      message: 'Internal token verification engine processing pipeline failure.' 
+    console.error('Firebase authentication error:', error);
+
+    return res.status(401).json({
+      success: false,
+      message: 'Invalid or expired Firebase authentication token.',
     });
   }
 };
 
 /**
- * Granular Role Authorization Access Evaluator
- * Rejects operations if the user's mapped token role does not match specified permission levels.
- * * @param {...string} allowedRoles - Spread list of permitted system roles (e.g., 'owner', 'customer', 'admin')
+ * --------------------------------------------------------------------------
+ * Role Authorization
+ * --------------------------------------------------------------------------
  */
-const authorize = (...allowedRoles) => {
+
+const authorize = (...roles) => {
   return (req, res, next) => {
-    // Ensure route has cleared the root protect middleware verification block first
     if (!req.user) {
-      return res.status(500).json({ 
-        success: false, 
-        message: 'Authorization context missing. Ensure protection middleware runs upstream.' 
+      return res.status(401).json({
+        success: false,
+        message: 'User authentication required.',
       });
     }
 
-    if (!allowedRoles.includes(req.user.role)) {
+    if (!roles.includes(req.user.role)) {
       return res.status(403).json({
         success: false,
-        message: `Forbidden Action. Your account role (${req.user.role}) lacks structural permissions to modify this endpoint asset.`
+        message: 'You do not have permission to access this resource.',
       });
     }
 
@@ -81,6 +67,6 @@ const authorize = (...allowedRoles) => {
 };
 
 module.exports = {
-  protect,
-  authorize
+  verifyFirebaseToken,
+  authorize,
 };
