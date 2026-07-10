@@ -6,7 +6,7 @@ import {
   TextInput, 
   TouchableOpacity, 
   ScrollView, 
-  KeyboardAvoidingView, 
+  KeyboardAvoidingView,
   Platform,
   Image,
   Alert,
@@ -19,7 +19,7 @@ import * as z from 'zod';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 
-// Define strict Zod validation schema matching your specifications
+// Define strict Zod validation schema matching specifications
 const signupSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
   email: z.string().email('Please enter a valid email address'),
@@ -29,7 +29,6 @@ const signupSchema = z.object({
     .regex(/[a-z]/, 'Must contain at least one lowercase letter')
     .regex(/[0-9]/, 'Must contain at least one number')
     .regex(/[^A-Za-z0-9]/, 'Must contain at least one special character'),
-  // FIXED: Allows the field to be optional or an empty string safely
   phoneNumber: z.string().optional().or(z.literal('')),
   address: z.string().min(5, 'Address must be complete'),
   occupation: z.string().min(2, 'Occupation is required'),
@@ -111,13 +110,13 @@ export default function Signup() {
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         
         {/* Top Header Layer featuring App Brand Logo */}
-<View style={styles.brandHeader}>
-  <Image
-    source={require('../../assets/AccessibilityPro.png')}
-    style={styles.brandLogo}
-    resizeMode="contain"
-  />
-</View>
+        <View style={styles.brandHeader}>
+          <Image
+            source={require('../../assets/AccessibilityPro.png')}
+            style={styles.brandLogo}
+            resizeMode="contain"
+          />
+        </View>
 
         <Text style={styles.title}>Create Account</Text>
         <Text style={styles.subtitle}>Register to start hosting or renting high-spec properties.</Text>
@@ -294,7 +293,7 @@ export default function Signup() {
 
         {/* Main Pressable Registration Button */}
         <TouchableOpacity 
-          style={styles.signupButton} 
+          style={styles.signupButton}
           onPress={handleSubmit(onSubmit)}
           disabled={isSubmitting}
           activeOpacity={0.8}
@@ -326,11 +325,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-  brandText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#007AFF',
-    marginLeft: 8,
+  brandLogo: {
+    width: 220,
+    height: 70,
   },
   title: {
     fontSize: 28,
@@ -404,7 +401,7 @@ const styles = StyleSheet.create({
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between', // FIXED: 'between' was changed to 'space-between'
+    justifyContent: 'space-between',
     borderWidth: 1,
     borderColor: '#E5E5EA',
     borderRadius: 10,
