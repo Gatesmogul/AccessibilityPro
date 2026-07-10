@@ -79,51 +79,59 @@ export default function Signin() {
     loadSavedCredentials();
   }, [setValue]);
 
-  const onSubmit = async (data: SigninFormValues) => {
-    setIsSubmitting(true);
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+ const onSubmit = async (data: SigninFormValues) => {
+  setIsSubmitting(true);
 
-      if (data.rememberMe) {
-        if (Platform.OS === 'web') {
-          localStorage.setItem('auth_email', data.email);
-          localStorage.setItem('auth_password', data.password);
-          localStorage.setItem('auth_role', data.role);
-        } else {
-          await saveCredentials(data.email, data.password, data.role);
-        }
-      } else {
-        if (Platform.OS === 'web') {
-          localStorage.removeItem('auth_email');
-          localStorage.removeItem('auth_password');
-          localStorage.removeItem('auth_role');
-        } else {
-          await clearCredentials();
-        }
-      }
+  try {
+    await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      login({
-        email: data.email,
-        role: data.role,
-        fullName: 'Logged In User',
-      });
-
-      if (data.role === 'owner') {
-        router.replace('/(drawer)/owner-dashboard');
-      } else {
-        router.replace('/(drawer)/homepage');
-      }
-   catch (error) {
-  console.error(error);
+    if (data.rememberMe) {
       if (Platform.OS === 'web') {
-        alert('Authentication Error: Invalid credentials provided. Please check and try again.');
+        localStorage.setItem('auth_email', data.email);
+        localStorage.setItem('auth_password', data.password);
+        localStorage.setItem('auth_role', data.role);
       } else {
-        Alert.alert('Authentication Error', 'Invalid credentials provided. Please check and try again.');
+        await saveCredentials(data.email, data.password, data.role);
       }
-    } finally {
-      setIsSubmitting(false);
+    } else {
+      if (Platform.OS === 'web') {
+        localStorage.removeItem('auth_email');
+        localStorage.removeItem('auth_password');
+        localStorage.removeItem('auth_role');
+      } else {
+        await clearCredentials();
+      }
     }
-  };
+
+    login({
+      email: data.email,
+      role: data.role,
+      fullName: 'Logged In User',
+    });
+
+    if (data.role === 'owner') {
+      router.replace('/(drawer)/owner-dashboard');
+    } else {
+      router.replace('/(drawer)/homepage');
+    }
+
+  } catch (error) {
+    console.error(error);
+
+    if (Platform.OS === 'web') {
+      alert(
+        'Authentication Error: Invalid credentials provided. Please check and try again.'
+      );
+    } else {
+      Alert.alert(
+        'Authentication Error',
+        'Invalid credentials provided. Please check and try again.'
+      );
+    }
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <KeyboardAvoidingView
