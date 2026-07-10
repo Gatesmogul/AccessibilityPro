@@ -66,7 +66,7 @@ export default function Signup() {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+     mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.7,
@@ -107,10 +107,10 @@ export default function Signup() {
         {/* Top Header Layer featuring App Brand Logo */}
         <View style={styles.brandHeader}>
           <Image
-            source={require('../../../../assets/AccessibilityPro.png')}
-            style={styles.brandLogo}
-            resizeMode="contain"
-          />
+  source={require('../../assets/AccessibilityPro.png')}
+  style={styles.brandLogo}
+  resizeMode="contain"
+/>
         </View>
 
         <Text style={styles.title}>Create Account</Text>
