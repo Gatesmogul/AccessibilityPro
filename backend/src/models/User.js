@@ -18,17 +18,20 @@ const User = {
   async initializeTable() {
     const createTableQuery = `
       CREATE TABLE IF NOT EXISTS users (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        full_name VARCHAR(100) NOT NULL,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        phone_number VARCHAR(20) UNIQUE NOT NULL,
-        password_hash VARCHAR(255) NOT NULL,
-        role VARCHAR(20) NOT NULL DEFAULT 'customer' CHECK (role IN ('customer', 'owner', 'admin')),
-        is_verified BOOLEAN DEFAULT false,
-        avatar_url VARCHAR(500),
-        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-      );
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    firebase_uid VARCHAR(128) UNIQUE NOT NULL,
+    full_name VARCHAR(150) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    phone_number VARCHAR(30),
+    address TEXT,
+    occupation VARCHAR(150),
+    role VARCHAR(20) NOT NULL DEFAULT 'customer'
+        CHECK(role IN ('customer','owner','admin')),
+    profile_image TEXT,
+    is_verified BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
+);
 
       -- Build performance optimization index loops on looking up profiles
       CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
