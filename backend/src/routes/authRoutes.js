@@ -1,46 +1,56 @@
 const express = require('express');
+
 const router = express.Router();
+
 const authController = require('../controllers/authController');
-const { protect } = require('../middleware/authMiddleware');
+const { verifyFirebaseToken } = require('../middleware/authMiddleware');
 
-/**
- * ============================================================================
- * Public Authentication Endpoints
- * ============================================================================
- */
+/*
+|--------------------------------------------------------------------------
+| Public Routes
+|--------------------------------------------------------------------------
+*/
 
-/**
- * @route   POST /api/v1/auth/register
- * @desc    Initiates user sign-up by caching data and staging a 6-digit OTP dispatch
- * @access  Public
- */
-router.post('/register', authController.register);
+// Firebase user registration.
+// Firebase ID Token is sent in Authorization header.
+router.post(
+  '/register',
+  verifyFirebaseToken,
+  authController.register
+);
 
-/**
- * @route   POST /api/v1/auth/verify-otp
- * @desc    Validates an email OTP token and commits the verified account to PostgreSQL
- * @access  Public
- */
-router.post('/verify-otp', authController.verifyOtp);
+// Login after Firebase sign-in.
+// Backend verifies Firebase token and returns PostgreSQL profile.
+router.post(
+  '/login',
+  verifyFirebaseToken,
+  authController.login
+);
 
-/**
- * @route   POST /api/v1/auth/login
- * @desc    Authenticates customer or owner credentials and returns a signed session JWT
- * @access  Public
- */
-router.post('/login', authController.login);
+// Optional email verification endpoint
+router.post(
+  '/verify-email',
+  verifyFirebaseToken,
+  authController.verifyEmail
+);
 
-/**
- * ============================================================================
- * Protected Authentication Endpoints
- * ============================================================================
- */
+// Refresh profile
+router.get(
+  '/me',
+  verifyFirebaseToken,
+  authController.getCurrentUser
+);
 
-/**
- * @route   POST /api/v1/auth/logout
- * @desc    Revokes client session context (Client evicts local storage tokens)
- * @access  Protected (Requires valid JWT signature)
- */
-router.post('/logout', protect, authController.logout);
+/*
+|--------------------------------------------------------------------------
+| Protected Routes
+|--------------------------------------------------------------------------
+*/
+
+router.post(
+  '/logout',
+  verifyFirebaseToken,
+  authController.logout
+);
 
 module.exports = router;
