@@ -264,18 +264,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 50,
     paddingBottom: 40,
-  },
-  brandHeader: {
-    flexDirection: 'row', // Updated from flex: 'row'
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  brandText: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#007AFF',
-    marginLeft: 8,
-  },
+ brandHeader: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginBottom: 24,
+},
+
+brandLogo: {
+  width: 220,
+  height: 70,
+},
+
+brandText: {
+  fontSize: 18,
+  fontWeight: '700',
+  color: '#007AFF',
+  marginLeft: 8,
+},
   title: {
     fontSize: 28,
     fontWeight: '700',
