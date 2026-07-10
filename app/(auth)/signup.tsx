@@ -307,7 +307,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
   scrollContainer: { paddingHorizontal: 24, paddingTop: 40, paddingBottom: 60 },
   brandHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 20 },
-  brandLogo: { width: 220, height: 70 },
+  brandLogo: { width: 240, height: 100 },
   title: { fontSize: 28, fontWeight: '700', color: '#1C1C1E', marginBottom: 6 },
   subtitle: { fontSize: 14, color: '#666667', marginBottom: 30, lineHeight: 20 },
   imagePickerContainer: { alignItems: 'center', marginBottom: 24 },
