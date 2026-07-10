@@ -107,7 +107,7 @@ export default function Signup() {
         {/* Top Header Layer featuring App Brand Logo */}
         <View style={styles.brandHeader}>
           <Image
-            source={require('../../../assets/AccessibilityPro.png')}
+            source={require('../../../../assets/AccessibilityPro.png')}
             style={styles.brandLogo}
             resizeMode="contain"
           />
