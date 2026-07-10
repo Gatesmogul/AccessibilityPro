@@ -1,7 +1,7 @@
-import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
-import { initializeAuth, getAuth, Auth } from "firebase/auth";
-import { getFirestore, Firestore } from "firebase/firestore";
-import { Platform } from "react-native";
+import { FirebaseApp, getApp, getApps, initializeApp } from 'firebase/app';
+import { getAuth, initializeAuth, Auth } from 'firebase/auth';
+import { getFirestore, Firestore } from 'firebase/firestore';
+import { Platform } from 'react-native';
 
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY!,
@@ -13,11 +13,13 @@ const firebaseConfig = {
 };
 
 const app: FirebaseApp =
-  getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+  getApps().length === 0
+    ? initializeApp(firebaseConfig)
+    : getApp();
 
 let auth: Auth;
 
-if (Platform.OS === "web") {
+if (Platform.OS === 'web') {
   auth = getAuth(app);
 } else {
   try {
@@ -29,4 +31,8 @@ if (Platform.OS === "web") {
 
 const db: Firestore = getFirestore(app);
 
+// Named exports
 export { app, auth, db };
+
+// Optional default export
+export default app;
