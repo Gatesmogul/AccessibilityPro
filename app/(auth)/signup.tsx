@@ -111,10 +111,13 @@ export default function Signup() {
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         
         {/* Top Header Layer featuring App Brand Logo */}
-        <View style={styles.brandHeader}>
-          <Ionicons name="business" size={32} color="#007AFF" />
-          <Text style={styles.brandText}>AccessibilityPro</Text>
-        </View>
+<View style={styles.brandHeader}>
+  <Image
+    source={require('../../assets/AccessibilityPro.png')}
+    style={styles.brandLogo}
+    resizeMode="contain"
+  />
+</View>
 
         <Text style={styles.title}>Create Account</Text>
         <Text style={styles.subtitle}>Register to start hosting or renting high-spec properties.</Text>
