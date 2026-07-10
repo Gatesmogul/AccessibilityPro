@@ -134,7 +134,7 @@ export default function Signin() {
         {/* Top Header Section */}
         <View style={styles.brandHeader}>
           <Image
-            source={require('../../../assets/AccessibilityPro.png')}
+            source={require('../../../../assets/AccessibilityPro.png')}
             style={styles.brandLogo}
             resizeMode="contain"
           />
