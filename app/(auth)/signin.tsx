@@ -113,7 +113,8 @@ export default function Signin() {
       } else {
         router.replace('/(drawer)/homepage');
       }
-    } catch (error) {
+   catch (error) {
+  console.error(error);
       if (Platform.OS === 'web') {
         alert('Authentication Error: Invalid credentials provided. Please check and try again.');
       } else {
@@ -126,18 +127,23 @@ export default function Signin() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
+  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+  keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}
+  style={styles.container}
+>
+      <ScrollView
+  contentContainerStyle={styles.scrollContainer}
+  keyboardShouldPersistTaps="handled"
+  showsVerticalScrollIndicator={false}
+>
         
         {/* Top Header Section */}
         <View style={styles.brandHeader}>
-          <Image
-            source={require('../../../../assets/AccessibilityPro.png')}
-            style={styles.brandLogo}
-            resizeMode="contain"
-          />
+         <Image
+  source={require('../../assets/AccessibilityPro.png')}
+  style={styles.brandLogo}
+  resizeMode="contain"
+/>
         </View>
 
         <Text style={styles.title}>Welcome Back</Text>
@@ -156,6 +162,7 @@ export default function Signin() {
                 placeholderTextColor="#A2A2A7"
                 keyboardType="email-address"
                 autoCapitalize="none"
+                autoCorrect={false}
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
@@ -178,6 +185,8 @@ export default function Signin() {
                 placeholderTextColor="#A2A2A7"
                 secureTextEntry
                 autoCapitalize="none"
+                autoCorrect={false}
+                textContentType="password"
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
@@ -227,7 +236,7 @@ export default function Signin() {
         {/* Submission Button Footers */}
         <TouchableOpacity 
           style={styles.signinButton} 
-          onPress={handleSubmit(onSubmit)}
+          onPress={isSubmitting ? undefined : handleSubmit(onSubmit)}
           disabled={isSubmitting}
         >
           {isSubmitting ? (
