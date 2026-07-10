@@ -1,84 +1,80 @@
-import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios, {
+  AxiosInstance,
+  InternalAxiosRequestConfig,
+  AxiosResponse,
+} from 'axios';
+
 import { Platform } from 'react-native';
+import { auth } from '../config/firebase';
 
-const ASYNC_STORAGE_AUTH_KEY = '@AccessibilityPro:Auth_Session';
-
-/**
- * Configure target operational gateway base address endpoint arrays.
- * Adjust the fallback string IP definitions matching your production environment deployment metrics.
- */
 const getBaseUrl = (): string => {
   if (__DEV__) {
-    // When running locally, Android emulators sandbox localhost to 10.0.2.2 
-    // while iOS simulators access machine localhost natively.
-    // NOTE: Changed port to 5001 to match your Render configuration!
-    return Platform.OS === 'android' 
-      ? 'http://10.0.2.2:5001/api/v1' 
+    return Platform.OS === 'android'
+      ? 'http://10.0.2.2:5001/api/v1'
       : 'http://localhost:5001/api/v1';
   }
-  
-  // Change this line to your live Render endpoint link
-  return process.env.EXPO_PUBLIC_API_URL || 'https://accessibilitypro.onrender.com/api/v1';
+
+  return (
+    process.env.EXPO_PUBLIC_API_URL ??
+    'https://accessibilitypro.onrender.com/api/v1'
+  );
 };
 
 const api: AxiosInstance = axios.create({
   baseURL: getBaseUrl(),
-  timeout: 15000,
+  timeout: 20000,
   headers: {
+    Accept: 'application/json',
     'Content-Type': 'application/json',
-    'Accept': 'application/json',
   },
 });
 
 /**
- * Request Interceptor Engine
- * Automatically extracts the cached user authorization token string signature 
- * out of AsyncStorage and binds it to outgoing HTTP Headers.
+ * Automatically attach Firebase ID Token
  */
 api.interceptors.request.use(
-  async (config: InternalAxiosRequestConfig): Promise<InternalAxiosRequestConfig> => {
+  async (
+    config: InternalAxiosRequestConfig
+  ): Promise<InternalAxiosRequestConfig> => {
     try {
-      const serializedSession = await AsyncStorage.getItem(ASYNC_STORAGE_AUTH_KEY);
-      
-      if (serializedSession) {
-        const parsedSession = JSON.parse(serializedSession);
-        // Assuming your auth payload stores a token field (e.g., JWT token signature)
-        const token = parsedSession?.token || parsedSession?.uid;
+      const currentUser = auth.currentUser;
 
-        if (token && config.headers) {
-          config.headers.Authorization = `Bearer ${token}`;
-        }
+      if (currentUser) {
+        // Refresh token if needed
+        const token = await currentUser.getIdToken();
+
+        config.headers.Authorization = `Bearer ${token}`;
       }
+
+      return config;
     } catch (error) {
-      console.error('Failed to parse validation token telemetry within API layer:', error);
+      console.error('Failed to attach Firebase token:', error);
+
+      return config;
     }
-    return config;
   },
-  (error) => {
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error)
 );
 
 /**
- * Response Interceptor Engine
- * Catches incoming payloads and acts as a central hub to trap 401 Unauthorized exceptions 
- * or 403 Forbidden token expiration issues for session clear routines.
+ * Handle Unauthorized Responses
  */
 api.interceptors.response.use(
   (response: AxiosResponse) => response,
-  async (error) => {
-    const originalRequest = error.config;
 
-    // Check if the server rejected the connection because of token invalidity
-    if (error.response && error.response.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
+  async (error) => {
+    if (error.response?.status === 401) {
+      console.warn('Unauthorized request.');
+
       try {
-        console.warn('Session signature validated as expired. Clearing local token indices...');
-        // Optional: Trigger global event or route to clean up dead sessions from storage
-        // await AsyncStorage.removeItem(ASYNC_STORAGE_AUTH_KEY);
-      } catch (clearError) {
-        console.error('Failed to clear expired session memory pointers:', clearError);
+        if (auth.currentUser) {
+          await auth.currentUser.getIdToken(true);
+        }
+      } catch (refreshError) {
+        console.error(
+          'Unable to refresh Firebase token.',
+          refreshError
+        );
       }
     }
 
