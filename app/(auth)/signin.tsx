@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -9,7 +8,8 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
-  Alert
+  Alert,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
@@ -137,11 +137,14 @@ export default function Signin() {
     >
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         
-        {/* Top Header Section */}
-        <View style={styles.brandHeader}>
-          <Ionicons name="business" size={28} color="#007AFF" />
-          <Text style={styles.brandText}>AccessibilityPro</Text>
-        </View>
+       {/* Top Header Section */}
+<View style={styles.brandHeader}>
+  <Image
+    source={require('../../assets/AccessibilityPro.png')}
+    style={styles.brandLogo}
+    resizeMode="contain"
+  />
+</View>
 
         <Text style={styles.title}>Welcome Back</Text>
         <Text style={styles.subtitle}>Sign in to manage listings or browse active properties.</Text>
