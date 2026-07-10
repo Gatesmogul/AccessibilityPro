@@ -1,3 +1,6 @@
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../../services/firebase';
+import api from '../../services/api';
 import { useState, useEffect } from 'react';
 import {
   StyleSheet,
@@ -83,15 +86,53 @@ export default function Signin() {
   setIsSubmitting(true);
 
   try {
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    /**
+     * Step 1
+     * Authenticate with Firebase
+     */
+    const credential = await signInWithEmailAndPassword(
+      auth,
+      data.email.trim(),
+      data.password
+    );
 
+    /**
+     * Step 2
+     * Get Firebase ID Token
+     */
+    const token = await credential.user.getIdToken();
+
+    /**
+     * Step 3
+     * Authenticate with your backend
+     */
+    const response = await api.post(
+      '/auth/login',
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const user = response.data.user;
+
+    /**
+     * Step 4
+     * Save Remember Me credentials
+     */
     if (data.rememberMe) {
       if (Platform.OS === 'web') {
         localStorage.setItem('auth_email', data.email);
         localStorage.setItem('auth_password', data.password);
-        localStorage.setItem('auth_role', data.role);
+        localStorage.setItem('auth_role', user.role);
       } else {
-        await saveCredentials(data.email, data.password, data.role);
+        await saveCredentials(
+          data.email,
+          data.password,
+          user.role
+        );
       }
     } else {
       if (Platform.OS === 'web') {
@@ -103,30 +144,37 @@ export default function Signin() {
       }
     }
 
+    /**
+     * Step 5
+     * Store authenticated user
+     */
     login({
-      email: data.email,
-      role: data.role,
-      fullName: 'Logged In User',
+      email: user.email,
+      role: user.role,
+      fullName: user.fullName,
     });
 
-    if (data.role === 'owner') {
+    /**
+     * Step 6
+     * Navigate using backend role
+     */
+    if (user.role === 'owner') {
       router.replace('/(drawer)/owner-dashboard');
     } else {
       router.replace('/(drawer)/homepage');
     }
-
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
 
+    const message =
+      error.response?.data?.message ||
+      error.message ||
+      'Invalid email or password.';
+
     if (Platform.OS === 'web') {
-      alert(
-        'Authentication Error: Invalid credentials provided. Please check and try again.'
-      );
+      alert(message);
     } else {
-      Alert.alert(
-        'Authentication Error',
-        'Invalid credentials provided. Please check and try again.'
-      );
+      Alert.alert('Authentication Error', message);
     }
   } finally {
     setIsSubmitting(false);
