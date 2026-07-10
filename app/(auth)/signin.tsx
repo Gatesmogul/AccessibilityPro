@@ -20,7 +20,6 @@ import * as SecureStore from 'expo-secure-store';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuthStore } from '../../store/useAuthStore';
 
-// Define explicit Sign In form boundaries
 const signinSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(1, 'Password field cannot be empty'),
@@ -50,7 +49,6 @@ export default function Signin() {
   const selectedRole = watch('role');
   const isRemembered = watch('rememberMe');
 
-  // Load saved credentials securely on app startup if "Remember Me" was previously active
   useEffect(() => {
     async function loadSavedCredentials() {
       try {
@@ -81,14 +79,11 @@ export default function Signin() {
     loadSavedCredentials();
   }, [setValue]);
 
-  // Submission routing execution
   const onSubmit = async (data: SigninFormValues) => {
     setIsSubmitting(true);
     try {
-      // Simulate endpoint authentication exchange
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
-      // 1. Manage device memory credentials depending on user selection switch
       if (data.rememberMe) {
         if (Platform.OS === 'web') {
           localStorage.setItem('auth_email', data.email);
@@ -107,14 +102,12 @@ export default function Signin() {
         }
       }
 
-      // 2. Commit authenticated session properties globally to the Zustand engine
       login({
         email: data.email,
         role: data.role,
         fullName: 'Logged In User',
       });
 
-      // 3. Reroute application frame dynamically based on validated status parameters
       if (data.role === 'owner') {
         router.replace('/(drawer)/owner-dashboard');
       } else {
@@ -141,7 +134,7 @@ export default function Signin() {
         {/* Top Header Section */}
         <View style={styles.brandHeader}>
           <Image
-            source={require('../../assets/AccessibilityPro.png')}
+            source={require('../../../assets/AccessibilityPro.png')}
             style={styles.brandLogo}
             resizeMode="contain"
           />
@@ -150,7 +143,7 @@ export default function Signin() {
         <Text style={styles.title}>Welcome Back</Text>
         <Text style={styles.subtitle}>Sign in to manage listings or browse active properties.</Text>
 
-        {/* Email Field Input Layout */}
+        {/* Email */}
         <View style={styles.inputWrapper}>
           <Text style={styles.label}>Email Address</Text>
           <Controller
@@ -172,7 +165,7 @@ export default function Signin() {
           {errors.email && <Text style={styles.errorText}>{errors.email.message}</Text>}
         </View>
 
-        {/* Password Field Input Layout */}
+        {/* Password */}
         <View style={styles.inputWrapper}>
           <Text style={styles.label}>Password</Text>
           <Controller
@@ -194,7 +187,7 @@ export default function Signin() {
           {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
         </View>
 
-        {/* Account Status Role Verification Toggle Buttons */}
+        {/* Status Verification */}
         <View style={styles.inputWrapper}>
           <Text style={styles.label}>Account Status</Text>
           
@@ -220,7 +213,7 @@ export default function Signin() {
           {errors.role && <Text style={styles.errorText}>{errors.role.message}</Text>}
         </View>
 
-        {/* Remember Me Secure Module */}
+        {/* Remember Me */}
         <TouchableOpacity 
           style={styles.rememberMeContainer}
           onPress={() => setValue('rememberMe', !isRemembered)}
@@ -231,7 +224,7 @@ export default function Signin() {
           <Text style={styles.rememberMeText}>Remember me</Text>
         </TouchableOpacity>
 
-        {/* Actions Button Footers */}
+        {/* Submission Button Footers */}
         <TouchableOpacity 
           style={styles.signinButton} 
           onPress={handleSubmit(onSubmit)}
@@ -257,130 +250,26 @@ export default function Signin() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  scrollContainer: {
-    paddingHorizontal: 24,
-    paddingTop: 50,
-    paddingBottom: 40,
-  },
-  brandHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  brandLogo: {
-    width: 220,
-    height: 70,
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: '#1C1C1E',
-    marginBottom: 6,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#666667',
-    marginBottom: 32,
-  },
-  inputWrapper: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#3A3A3C',
-    marginBottom: 8,
-  },
-  input: {
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#E5E5EA',
-    borderRadius: 10,
-    paddingHorizontal: 16,
-    fontSize: 15,
-    color: '#1C1C1E',
-    backgroundColor: '#FAFAFC',
-  },
-  inputError: {
-    borderColor: '#FF3B30',
-    backgroundColor: '#FFFBFA',
-  },
-  errorText: {
-    color: '#FF3B30',
-    fontSize: 12,
-    marginTop: 6,
-    marginLeft: 4,
-  },
-  checkboxRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderWidth: 1,
-    borderColor: '#E5E5EA',
-    borderRadius: 10,
-    padding: 16,
-    marginBottom: 12,
-    backgroundColor: '#FAFAFC',
-  },
-  checkboxRowActive: {
-    borderColor: '#007AFF',
-    backgroundColor: '#F2F8FF',
-  },
-  checkboxLabel: {
-    flex: 1,
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#1C1C1E',
-  },
-  tickBox: {
-    width: 22,
-    height: 22,
-    borderWidth: 2,
-    borderColor: '#C7C7CC',
-    borderRadius: 6,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  tickBoxChecked: {
-    borderColor: '#007AFF',
-    backgroundColor: '#007AFF',
-  },
-  rememberMeContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 10,
-    alignSelf: 'flex-start',
-  },
-  rememberMeText: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#3A3A3C',
-    marginLeft: 10,
-  },
-  signinButton: {
-    height: 52,
-    backgroundColor: '#007AFF',
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 24,
-  },
-  signinButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  forgotButton: {
-    marginTop: 18,
-    alignItems: 'center',
-  },
-  forgotButtonText: {
-    color: '#007AFF',
-    fontSize: 14,
-    fontWeight: '500',
-  },
+  container: { flex: 1, backgroundColor: '#FFFFFF' },
+  scrollContainer: { paddingHorizontal: 24, paddingTop: 50, paddingBottom: 40 },
+  brandHeader: { flexDirection: 'row', alignItems: 'center', marginBottom: 24 },
+  brandLogo: { width: 220, height: 70 },
+  title: { fontSize: 28, fontWeight: '700', color: '#1C1C1E', marginBottom: 6 },
+  subtitle: { fontSize: 14, color: '#666667', marginBottom: 32 },
+  inputWrapper: { marginBottom: 20 },
+  label: { fontSize: 14, fontWeight: '600', color: '#3A3A3C', marginBottom: 8 },
+  input: { height: 50, borderWidth: 1, borderColor: '#E5E5EA', borderRadius: 10, paddingHorizontal: 16, fontSize: 15, color: '#1C1C1E', backgroundColor: '#FAFAFC' },
+  inputError: { borderColor: '#FF3B30', backgroundColor: '#FFFBFA' },
+  errorText: { color: '#FF3B30', fontSize: 12, marginTop: 6, marginLeft: 4 },
+  checkboxRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', borderWidth: 1, borderColor: '#E5E5EA', borderRadius: 10, padding: 16, marginBottom: 12, backgroundColor: '#FAFAFC' },
+  checkboxRowActive: { borderColor: '#007AFF', backgroundColor: '#F2F8FF' },
+  checkboxLabel: { flex: 1, fontSize: 15, fontWeight: '500', color: '#1C1C1E' },
+  tickBox: { width: 22, height: 22, borderWidth: 2, borderColor: '#C7C7CC', borderRadius: 6, justifyContent: 'center', alignItems: 'center' },
+  tickBoxChecked: { borderColor: '#007AFF', backgroundColor: '#007AFF' },
+  rememberMeContainer: { flexDirection: 'row', alignItems: 'center', marginVertical: 10, alignSelf: 'flex-start' },
+  rememberMeText: { fontSize: 14, fontWeight: '500', color: '#3A3A3C', marginLeft: 10 },
+  signinButton: { height: 52, backgroundColor: '#007AFF', borderRadius: 12, justifyContent: 'center', alignItems: 'center', marginTop: 24 },
+  signinButtonText: { color: '#FFFFFF', fontSize: 16, fontWeight: '600' },
+  forgotButton: { marginTop: 18, alignItems: 'center' },
+  forgotButtonText: { color: '#007AFF', fontSize: 14, fontWeight: '500' },
 });
