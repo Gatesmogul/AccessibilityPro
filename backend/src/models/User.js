@@ -65,7 +65,7 @@ const User = {
     }
 
     const insertQuery = `
-      INSERT INTO users (full_name, email, phone_number, password_hash, role, is_verified, created_at, updated_at)
+      INSERT INTO users (full_name, email, phone_number, password, role, is_verified, created_at, updated_at)
       VALUES ($1, $2, $3, $4, $5, true, NOW(), NOW())
       RETURNING id, full_name, email, phone_number, role, is_verified, created_at;
     `;
@@ -74,7 +74,7 @@ const User = {
       fullName.trim(),
       normalizedEmail,
       phoneNumber.trim(),
-      passwordHash,
+      password,
       cleanRole
     ];
 
@@ -89,7 +89,7 @@ const User = {
   async findByEmail(email) {
     if (!email) return null;
     const selectQuery = `
-      SELECT id, full_name, email, phone_number, password_hash, role, is_verified, avatar_url, created_at 
+      SELECT id, full_name, email, phone_number, password, role, is_verified, avatar_url, created_at 
       FROM users 
       WHERE email = $1;
     `;
