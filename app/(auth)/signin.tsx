@@ -260,47 +260,48 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
+
   scrollContainer: {
     paddingHorizontal: 24,
     paddingTop: 50,
     paddingBottom: 40,
- brandHeader: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  marginBottom: 24,
-},
+  },
 
-brandLogo: {
-  width: 220,
-  height: 70,
-},
+  brandHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
 
-brandText: {
-  fontSize: 18,
-  fontWeight: '700',
-  color: '#007AFF',
-  marginLeft: 8,
-},
+  brandLogo: {
+    width: 220,
+    height: 70,
+  },
+
   title: {
     fontSize: 28,
     fontWeight: '700',
     color: '#1C1C1E',
     marginBottom: 6,
   },
+
   subtitle: {
     fontSize: 14,
     color: '#666667',
     marginBottom: 32,
   },
+
   inputWrapper: {
     marginBottom: 20,
   },
+
   label: {
     fontSize: 14,
     fontWeight: '600',
     color: '#3A3A3C',
     marginBottom: 8,
   },
+
   input: {
     height: 50,
     borderWidth: 1,
@@ -311,16 +312,19 @@ brandText: {
     color: '#1C1C1E',
     backgroundColor: '#FAFAFC',
   },
+
   inputError: {
     borderColor: '#FF3B30',
     backgroundColor: '#FFFBFA',
   },
+
   errorText: {
     color: '#FF3B30',
     fontSize: 12,
     marginTop: 6,
     marginLeft: 4,
   },
+
   checkboxRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -332,16 +336,19 @@ brandText: {
     marginBottom: 12,
     backgroundColor: '#FAFAFC',
   },
+
   checkboxRowActive: {
     borderColor: '#007AFF',
     backgroundColor: '#F2F8FF',
   },
+
   checkboxLabel: {
-    fontSize: 15,
-    color: '#1C1C1E',
-    fontWeight: '500',
     flex: 1,
+    fontSize: 15,
+    fontWeight: '500',
+    color: '#1C1C1E',
   },
+
   tickBox: {
     width: 22,
     height: 22,
@@ -351,22 +358,26 @@ brandText: {
     justifyContent: 'center',
     alignItems: 'center',
   },
+
   tickBoxChecked: {
     borderColor: '#007AFF',
     backgroundColor: '#007AFF',
   },
+
   rememberMeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 10,
     alignSelf: 'flex-start',
   },
+
   rememberMeText: {
     fontSize: 14,
-    color: '#3A3A3C',
     fontWeight: '500',
+    color: '#3A3A3C',
     marginLeft: 10,
   },
+
   signinButton: {
     height: 52,
     backgroundColor: '#007AFF',
@@ -375,15 +386,18 @@ brandText: {
     alignItems: 'center',
     marginTop: 24,
   },
+
   signinButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },
+
   forgotButton: {
     marginTop: 18,
     alignItems: 'center',
   },
+
   forgotButtonText: {
     color: '#007AFF',
     fontSize: 14,
