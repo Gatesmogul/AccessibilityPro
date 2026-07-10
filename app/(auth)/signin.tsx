@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -137,14 +138,14 @@ export default function Signin() {
     >
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         
-       {/* Top Header Section */}
-<View style={styles.brandHeader}>
-  <Image
-    source={require('../../assets/AccessibilityPro.png')}
-    style={styles.brandLogo}
-    resizeMode="contain"
-  />
-</View>
+        {/* Top Header Section */}
+        <View style={styles.brandHeader}>
+          <Image
+            source={require('../../assets/AccessibilityPro.png')}
+            style={styles.brandLogo}
+            resizeMode="contain"
+          />
+        </View>
 
         <Text style={styles.title}>Welcome Back</Text>
         <Text style={styles.subtitle}>Sign in to manage listings or browse active properties.</Text>
@@ -260,48 +261,40 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
-
   scrollContainer: {
     paddingHorizontal: 24,
     paddingTop: 50,
     paddingBottom: 40,
   },
-
   brandHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 24,
   },
-
   brandLogo: {
     width: 220,
     height: 70,
   },
-
   title: {
     fontSize: 28,
     fontWeight: '700',
     color: '#1C1C1E',
     marginBottom: 6,
   },
-
   subtitle: {
     fontSize: 14,
     color: '#666667',
     marginBottom: 32,
   },
-
   inputWrapper: {
     marginBottom: 20,
   },
-
   label: {
     fontSize: 14,
     fontWeight: '600',
     color: '#3A3A3C',
     marginBottom: 8,
   },
-
   input: {
     height: 50,
     borderWidth: 1,
@@ -312,19 +305,16 @@ const styles = StyleSheet.create({
     color: '#1C1C1E',
     backgroundColor: '#FAFAFC',
   },
-
   inputError: {
     borderColor: '#FF3B30',
     backgroundColor: '#FFFBFA',
   },
-
   errorText: {
     color: '#FF3B30',
     fontSize: 12,
     marginTop: 6,
     marginLeft: 4,
   },
-
   checkboxRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -336,19 +326,16 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     backgroundColor: '#FAFAFC',
   },
-
   checkboxRowActive: {
     borderColor: '#007AFF',
     backgroundColor: '#F2F8FF',
   },
-
   checkboxLabel: {
     flex: 1,
     fontSize: 15,
     fontWeight: '500',
     color: '#1C1C1E',
   },
-
   tickBox: {
     width: 22,
     height: 22,
@@ -358,26 +345,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
   tickBoxChecked: {
     borderColor: '#007AFF',
     backgroundColor: '#007AFF',
   },
-
   rememberMeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 10,
     alignSelf: 'flex-start',
   },
-
   rememberMeText: {
     fontSize: 14,
     fontWeight: '500',
     color: '#3A3A3C',
     marginLeft: 10,
   },
-
   signinButton: {
     height: 52,
     backgroundColor: '#007AFF',
@@ -386,18 +369,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 24,
   },
-
   signinButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },
-
   forgotButton: {
     marginTop: 18,
     alignItems: 'center',
   },
-
   forgotButtonText: {
     color: '#007AFF',
     fontSize: 14,
