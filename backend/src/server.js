@@ -44,9 +44,24 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
  * 2. Primary Domain Routing Table Mount Points
  * ============================================================================
  */
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/products', productRoutes);
-app.use('/api/v1/cart', cartRoutes);
+
+// Defensive validation wrapper to intercept missing or invalid router module exports
+const verifyRouter = (routeName, routeModule) => {
+  if (!routeModule || (typeof routeModule !== 'function' && typeof routeModule.use !== 'function')) {
+    console.error(`🚨 CRITICAL CONFIGURATION FAULT: "${routeName}" did not export a valid Express router function or object instance!`);
+    
+    // Fallback handler to prevent hard initialization crashes on app.use()
+    return (req, res) => res.status(503).json({ 
+      success: false, 
+      message: `The resource gateway for ${routeName} is temporarily offline due to an internal configuration mismatch.` 
+    });
+  }
+  return routeModule;
+};
+
+app.use('/api/v1/auth', verifyRouter('authRoutes', authRoutes));
+app.use('/api/v1/products', verifyRouter('productRoutes', productRoutes));
+app.use('/api/v1/cart', verifyRouter('cartRoutes', cartRoutes));
 
 // Health endpoint
 app.get('/health', (req, res) => {
