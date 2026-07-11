@@ -9,7 +9,8 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
-  Alert
+  Alert,
+  Image
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
@@ -40,6 +41,7 @@ export default function ForgotPassword() {
   const router = useRouter();
   const [step, setStep] = useState<'request' | 'reset'>('request');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [securePasswordEntry, setSecurePasswordEntry] = useState(true);
 
   // Hook Form for Step 1: Request Reset Link
   const requestForm = useForm<RequestFormValues>({
@@ -57,7 +59,6 @@ export default function ForgotPassword() {
   const onRequestSubmit = async (data: RequestFormValues) => {
     setIsSubmitting(true);
     try {
-      // Simulate Backend Endpoint Connection
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       Alert.alert(
@@ -66,7 +67,7 @@ export default function ForgotPassword() {
         [{ 
           text: 'Proceed', 
           onPress: () => {
-            resetForm.setValue('email', data.email); // Auto-fill email in step 2
+            resetForm.setValue('email', data.email);
             setStep('reset');
           } 
         }]
@@ -82,7 +83,6 @@ export default function ForgotPassword() {
   const onResetSubmit = async (data: ResetFormValues) => {
     setIsSubmitting(true);
     try {
-      // Simulate Password Reset Backend Execution
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       Alert.alert(
@@ -104,15 +104,19 @@ export default function ForgotPassword() {
     >
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         
-        {/* Brand Top Header Indicator */}
+        {/* Brand Top Header Indicator with Custom Logo Asset */}
         <View style={styles.brandHeader}>
-          <Ionicons name="business" size={28} color="#007AFF" />
+          <Image 
+            source={{ uri: 'https://raw.githubusercontent.com/Gatesmogul/AccessibilityPro/main/assets/AccessibilityPro%20logo.png' }} 
+            style={styles.brandLogo}
+            resizeMode="contain"
+          />
           <Text style={styles.brandText}>AccessibilityPro</Text>
         </View>
 
         {step === 'request' ? (
           /* ==================== STEP 1 UI ==================== */
-          <View>
+          <View style={styles.formContainer}>
             <Text style={styles.title}>Reset Password</Text>
             <Text style={styles.subtitle}>Enter your registered email address to receive a verification token.</Text>
 
@@ -149,7 +153,7 @@ export default function ForgotPassword() {
           </View>
         ) : (
           /* ==================== STEP 2 UI ==================== */
-          <View>
+          <View style={styles.formContainer}>
             <Text style={styles.title}>Create New Password</Text>
             <Text style={styles.subtitle}>Enter the token sent to your email along with your new account password.</Text>
 
@@ -159,7 +163,7 @@ export default function ForgotPassword() {
               <Controller
                 control={resetForm.control}
                 name="email"
-                render={({ field: { onChange, onBlur, value } }) => (
+                render={({ field: { value } }) => (
                   <TextInput
                     style={[styles.input, styles.disabledInput]}
                     editable={false}
@@ -195,22 +199,39 @@ export default function ForgotPassword() {
             {/* New Password Input Field */}
             <View style={styles.inputWrapper}>
               <Text style={styles.label}>New Password</Text>
-              <Controller
-                control={resetForm.control}
-                name="newPassword"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextInput
-                    style={[styles.input, resetForm.formState.errors.newPassword && styles.inputError]}
-                    placeholder="••••••••"
-                    placeholderTextColor="#A2A2A7"
-                    secureTextEntry
-                    autoCapitalize="none"
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
+              <View style={styles.passwordInputContainer}>
+                <Controller
+                  control={resetForm.control}
+                  name="newPassword"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <TextInput
+                      style={[
+                        styles.passwordField, 
+                        resetForm.formState.errors.newPassword && styles.inputError,
+                        !securePasswordEntry && { paddingRight: 50 }
+                      ]}
+                      placeholder="••••••••"
+                      placeholderTextColor="#A2A2A7"
+                      secureTextEntry={securePasswordEntry}
+                      autoCapitalize="none"
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      value={value}
+                    />
+                  )}
+                />
+                <TouchableOpacity 
+                  style={styles.visibilityToggle} 
+                  onPress={() => setSecurePasswordEntry(!securePasswordEntry)}
+                  activeOpacity={0.7}
+                >
+                  <Ionicons 
+                    name={securePasswordEntry ? "eye-off-outline" : "eye-outline"} 
+                    size={22} 
+                    color="#8E8E93" 
                   />
-                )}
-              />
+                </TouchableOpacity>
+              </View>
               {resetForm.formState.errors.newPassword && (
                 <Text style={styles.errorText}>{resetForm.formState.errors.newPassword.message}</Text>
               )}
@@ -250,11 +271,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 24,
   },
+  brandLogo: {
+    width: 28,
+    height: 28,
+  },
   brandText: {
     fontSize: 18,
     fontWeight: '700',
     color: '#007AFF',
-    marginLeft: 8,
+    marginLeft: 10,
+  },
+  formContainer: {
+    width: '100%',
   },
   title: {
     fontSize: 26,
@@ -270,6 +298,7 @@ const styles = StyleSheet.create({
   },
   inputWrapper: {
     marginBottom: 20,
+    width: '100%',
   },
   label: {
     fontSize: 14,
@@ -286,6 +315,31 @@ const styles = StyleSheet.create({
     fontSize: 15,
     color: '#1C1C1E',
     backgroundColor: '#FAFAFC',
+  },
+  passwordInputContainer: {
+    position: 'relative',
+    width: '100%',
+    justifyContent: 'center',
+  },
+  passwordField: {
+    height: 50,
+    borderWidth: 1,
+    borderColor: '#E5E5EA',
+    borderRadius: 10,
+    paddingLeft: 16,
+    paddingRight: 48,
+    fontSize: 15,
+    color: '#1C1C1E',
+    backgroundColor: '#FAFAFC',
+    width: '100%',
+  },
+  visibilityToggle: {
+    position: 'absolute',
+    right: 0,
+    height: 50,
+    width: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   disabledInput: {
     backgroundColor: '#E5E5EA',
