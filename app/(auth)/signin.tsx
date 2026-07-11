@@ -1,4 +1,7 @@
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import {
+  signInWithEmailAndPassword,
+  signOut,
+} from 'firebase/auth';
 import { auth } from '../../services/firebase';
 import api from '../../services/api';
 import { useState, useEffect } from 'react';
@@ -82,7 +85,7 @@ export default function Signin() {
     loadSavedCredentials();
   }, [setValue]);
 
- const onSubmit = async (data: SigninFormValues) => {
+const onSubmit = async (data: SigninFormValues) => {
   setIsSubmitting(true);
 
   try {
@@ -98,13 +101,28 @@ export default function Signin() {
 
     /**
      * Step 2
-     * Get Firebase ID Token
+     * Verify email
      */
-    const token = await credential.user.getIdToken();
+    if (!credential.user.emailVerified) {
+      await signOut(auth);
+
+      Alert.alert(
+        'Email Not Verified',
+        'Please verify your email before signing in.'
+      );
+
+      return;
+    }
 
     /**
      * Step 3
-     * Authenticate with your backend
+     * Get Firebase ID Token
+     */
+    const token = await credential.user.getIdToken(true);
+
+    /**
+     * Step 4
+     * Authenticate with backend
      */
     const response = await api.post(
       '/auth/login',
@@ -119,8 +137,23 @@ export default function Signin() {
     const user = response.data.user;
 
     /**
-     * Step 4
-     * Save Remember Me credentials
+     * Step 5
+     * Verify selected account type
+     */
+    if (user.role !== data.role) {
+      await signOut(auth);
+
+      Alert.alert(
+        'Incorrect Account Type',
+        `This account is registered as "${user.role}". Please select the correct account type.`
+      );
+
+      return;
+    }
+
+    /**
+     * Step 6
+     * Save Remember Me
      */
     if (data.rememberMe) {
       if (Platform.OS === 'web') {
@@ -145,37 +178,33 @@ export default function Signin() {
     }
 
     /**
-     * Step 5
-     * Store authenticated user
+     * Step 7
+     * Save authenticated user
      */
     login({
       email: user.email,
-      role: user.role,
       fullName: user.fullName,
+      role: user.role,
     });
 
     /**
-     * Step 6
-     * Navigate using backend role
+     * Step 8
+     * Navigate
      */
     if (user.role === 'owner') {
       router.replace('/(drawer)/owner-dashboard');
     } else {
-      router.replace('/(drawer)/homepage');
+      router.replace('/(drawer)/customer-dashboard');
     }
   } catch (error: any) {
     console.error(error);
 
     const message =
-      error.response?.data?.message ||
-      error.message ||
+      error?.response?.data?.message ||
+      error?.message ||
       'Invalid email or password.';
 
-    if (Platform.OS === 'web') {
-      alert(message);
-    } else {
-      Alert.alert('Authentication Error', message);
-    }
+    Alert.alert('Authentication Error', message);
   } finally {
     setIsSubmitting(false);
   }
