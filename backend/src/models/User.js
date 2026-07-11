@@ -11,7 +11,7 @@ const VALID_ROLES = {
 
 const User = {
   /**
-   * Initialize users table safely with sequential DDL executions
+   * Initialize users table safely with sequential DDL executions and schema mutations
    */
   async initializeTable() {
     try {
@@ -38,7 +38,13 @@ const User = {
       `;
       await db.query(createTableQuery);
 
-      // 3. Sequentially append performance indices once table rows are compiled
+      // 3. DEFENSIVE PATCH: Add firebase_uid if the table existed without it
+      await db.query(`
+        ALTER TABLE users 
+        ADD COLUMN IF NOT EXISTS firebase_uid VARCHAR(128) UNIQUE;
+      `);
+
+      // 4. Sequentially append performance indices once table rows are compiled
       await db.query(`
         CREATE INDEX IF NOT EXISTS idx_users_email
         ON users(email);
