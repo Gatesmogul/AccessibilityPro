@@ -11,38 +11,45 @@ const VALID_ROLES = {
 
 const User = {
   /**
-   * Initialize users table
+   * Initialize users table safely with sequential DDL executions
    */
   async initializeTable() {
-    const createTableQuery = `
-      CREATE EXTENSION IF NOT EXISTS "pgcrypto";
-
-      CREATE TABLE IF NOT EXISTS users (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        firebase_uid VARCHAR(128) UNIQUE NOT NULL,
-        full_name VARCHAR(150) NOT NULL,
-        email VARCHAR(255) UNIQUE NOT NULL,
-        phone_number VARCHAR(30),
-        address TEXT,
-        occupation VARCHAR(150),
-        role VARCHAR(20) NOT NULL DEFAULT 'customer'
-          CHECK (role IN ('customer','owner','admin')),
-        profile_image TEXT,
-        is_verified BOOLEAN DEFAULT TRUE,
-        created_at TIMESTAMPTZ DEFAULT NOW(),
-        updated_at TIMESTAMPTZ DEFAULT NOW()
-      );
-
-      CREATE INDEX IF NOT EXISTS idx_users_email
-      ON users(email);
-
-      CREATE INDEX IF NOT EXISTS idx_users_firebase_uid
-      ON users(firebase_uid);
-    `;
-
     try {
+      // 1. Ensure the cryptographic extension layer is installed first
+      await db.query('CREATE EXTENSION IF NOT EXISTS "pgcrypto";');
+
+      // 2. Provision the base table infrastructure independently
+      const createTableQuery = `
+        CREATE TABLE IF NOT EXISTS users (
+          id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+          firebase_uid VARCHAR(128) UNIQUE NOT NULL,
+          full_name VARCHAR(150) NOT NULL,
+          email VARCHAR(255) UNIQUE NOT NULL,
+          phone_number VARCHAR(30),
+          address TEXT,
+          occupation VARCHAR(150),
+          role VARCHAR(20) NOT NULL DEFAULT 'customer'
+            CHECK (role IN ('customer','owner','admin')),
+          profile_image TEXT,
+          is_verified BOOLEAN DEFAULT TRUE,
+          created_at TIMESTAMPTZ DEFAULT NOW(),
+          updated_at TIMESTAMPTZ DEFAULT NOW()
+        );
+      `;
       await db.query(createTableQuery);
-      console.log('Users table initialized successfully.');
+
+      // 3. Sequentially append performance indices once table rows are compiled
+      await db.query(`
+        CREATE INDEX IF NOT EXISTS idx_users_email
+        ON users(email);
+      `);
+
+      await db.query(`
+        CREATE INDEX IF NOT EXISTS idx_users_firebase_uid
+        ON users(firebase_uid);
+      `);
+
+      console.log('Users table and performance indexes initialized successfully.');
     } catch (error) {
       console.error('Failed to initialize users table:', error);
       throw error;
@@ -156,7 +163,6 @@ const User = {
     ];
 
     const result = await db.query(query, values);
-
     return result.rows[0] || null;
   },
 
