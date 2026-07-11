@@ -18,6 +18,16 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
+import { FirebaseError } from "firebase/app";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+  updateProfile,
+  User,
+} from "firebase/auth";
+
+import { auth } from "../../services/firebase";
+import api from "../../services/api";
 
 const signupSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
@@ -52,7 +62,7 @@ export default function Signup() {
       phoneNumber: '',
       address: '',
       occupation: '',
-      role: undefined,
+      role: undefined as SignupFormValues['role'] | undefined,
     }
   });
 
@@ -66,7 +76,7 @@ export default function Signup() {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-     mediaTypes: ['images'],
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.7,
@@ -79,19 +89,98 @@ export default function Signup() {
 
   const onSubmit = async (data: SignupFormValues) => {
     setIsSubmitting(true);
-    try {
-      const completePayload = { ...data, profileImage };
-      console.log('Sending payload to backend:', completePayload);
+    let createdFirebaseUser: User | null = null;
 
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+    try {
+      // STEP 1: Create authentication user in Firebase
+      const userCredential = await createUserWithEmailAndPassword(
+        auth, 
+        data.email.trim(), 
+        data.password
+      );
+      createdFirebaseUser = userCredential.user;
+
+      // STEP 2: Save user's display name in Firebase
+      await updateProfile(createdFirebaseUser, {
+        displayName: data.fullName.trim(),
+      });
+
+      // STEP 3: Send verification email
+      await sendEmailVerification(createdFirebaseUser);
+
+      // STEP 4: Get Firebase ID Token
+      const token = await createdFirebaseUser.getIdToken();
+
+      // STEP 5: Save user profile into PostgreSQL backend
+      try {
+        await api.post(
+          "/auth/register",
+          {
+            firebaseUid: createdFirebaseUser.uid,
+            fullName: data.fullName.trim(),
+            address: data.address.trim(),
+            occupation: data.occupation.trim(),
+            phoneNumber: data.phoneNumber?.trim() || "",
+            role: data.role,
+            profileImage: profileImage,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+      } catch (backendError) {
+        // Rollback strategy: delete the Firebase account if SQL profile insertion fails
+        if (createdFirebaseUser) {
+          await createdFirebaseUser.delete();
+        }
+        throw backendError;
+      }
 
       Alert.alert(
-        'Verification Sent!',
-        `A verification email has been sent to ${data.email}. Please verify your identity to continue.`,
-        [{ text: 'OK', onPress: () => router.replace('/(auth)/verification') }]
+        "Registration Successful",
+        "A verification email has been sent. Please verify your email before signing in.",
+        [
+          {
+            text: "OK",
+            onPress: () => router.replace("/(auth)/verification"),
+          },
+        ]
       );
-    } catch (error) {
-      Alert.alert('Registration Failed', 'An error occurred during signup. Please try again.');
+    } catch (error: any) {
+      console.log(error);
+      let message = "Registration failed.";
+
+      if (error instanceof FirebaseError || (error.code && typeof error.code === 'string')) {
+        const errorCode = error.code;
+        switch (errorCode) {
+          case "auth/email-already-in-use":
+            message = "An account already exists with this email.";
+            break;
+          case "auth/invalid-email":
+            message = "Invalid email address.";
+            break;
+          case "auth/weak-password":
+            message = "Password should be stronger.";
+            break;
+          case "auth/network-request-failed":
+            message = "Network error. Check your internet connection.";
+            break;
+          default:
+            message = error.message || "Registration failed.";
+        }
+      } else {
+        // Fallback for custom backend errors passed via Axios response
+        const backendMessage = error.response?.data?.message;
+        if (backendMessage && backendMessage.length < 120) {
+          message = backendMessage;
+        } else {
+          message = error.message || "An unexpected system error occurred.";
+        }
+      }
+
+      Alert.alert("Signup Failed", message);
     } finally {
       setIsSubmitting(false);
     }
@@ -107,10 +196,10 @@ export default function Signup() {
         {/* Top Header Layer featuring App Brand Logo */}
         <View style={styles.brandHeader}>
           <Image
-  source={require('../../assets/AccessibilityPro.png')}
-  style={styles.brandLogo}
-  resizeMode="contain"
-/>
+            source={require('../../assets/AccessibilityPro.png')}
+            style={styles.brandLogo}
+            resizeMode="contain"
+          />
         </View>
 
         <Text style={styles.title}>Create Account</Text>
@@ -287,7 +376,7 @@ export default function Signup() {
         {/* Main Registration Button */}
         <TouchableOpacity 
           style={styles.signupButton}
-          onPress={handleSubmit(onSubmit)}
+          onPress={isSubmitting ? undefined : handleSubmit(onSubmit)}
           disabled={isSubmitting}
           activeOpacity={0.8}
         >
