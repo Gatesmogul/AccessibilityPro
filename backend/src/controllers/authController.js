@@ -195,6 +195,68 @@ const authController = {
   },
 
   /**
+   * Missing Endpoint Fix 1: Optional Email Verification Sync Handler
+   * Resolves router.post('/verify-email', ...) reference crash
+   */
+  async verifyEmail(req, res) {
+    try {
+      // Expects payload containing email reference from authorized middleware tokens
+      const email = req.user?.email || req.body.email;
+      
+      if (!email) {
+        return res.status(400).json({ success: false, message: 'Email identifier could not be validated.' });
+      }
+
+      await db.query('UPDATE users SET is_verified = true WHERE email = $1', [email.toLowerCase().trim()]);
+
+      return res.status(200).json({
+        success: true,
+        message: 'Email verification parameters verified and synchronized successfully.'
+      });
+    } catch (error) {
+      console.error('Email verification execution thread sync exception:', error.message);
+      return res.status(500).json({ success: false, message: 'Internal error syncing email verification state.' });
+    }
+  },
+
+  /**
+   * Missing Endpoint Fix 2: Fetch Current Profile Session Metadata
+   * Resolves router.get('/me', ...) reference crash
+   */
+  async getCurrentUser(req, res) {
+    try {
+      // The verifyFirebaseToken or JWT middleware attaches user context variables onto req.user
+      const userId = req.user?.uid;
+
+      if (!userId) {
+        return res.status(401).json({ success: false, message: 'Unauthorized profile request access context.' });
+      }
+
+      const lookupQuery = 'SELECT id, full_name, email, role, created_at FROM users WHERE id = $1';
+      const userResult = await db.query(lookupQuery, [userId]);
+
+      if (userResult.rows.length === 0) {
+        return res.status(404).json({ success: false, message: 'User profile session context not found.' });
+      }
+
+      const currentUser = userResult.rows[0];
+      return res.status(200).json({
+        success: true,
+        user: {
+          uid: currentUser.id,
+          fullName: currentUser.full_name,
+          email: currentUser.email,
+          role: currentUser.role,
+          createdAt: currentUser.created_at
+        }
+      });
+    } catch (error) {
+      console.error('Get current user record fetch exception:', error.message);
+      return res.status(500).json({ success: false, message: 'Internal server error processing profile data lookup.' });
+    }
+  },
+
+  /**
    * Invalidates authentication states on the client side
    */
   async logout(req, res) {
