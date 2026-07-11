@@ -3,9 +3,8 @@ import axios, {
   InternalAxiosRequestConfig,
   AxiosResponse,
 } from 'axios';
-
 import { Platform } from 'react-native';
-import { auth } from '../config/firebase';
+import { auth } from './firebase';
 
 const getBaseUrl = (): string => {
   if (__DEV__) {
@@ -40,16 +39,13 @@ api.interceptors.request.use(
       const currentUser = auth.currentUser;
 
       if (currentUser) {
-        // Refresh token if needed
         const token = await currentUser.getIdToken();
-
         config.headers.Authorization = `Bearer ${token}`;
       }
 
       return config;
     } catch (error) {
       console.error('Failed to attach Firebase token:', error);
-
       return config;
     }
   },
