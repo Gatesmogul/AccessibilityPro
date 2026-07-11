@@ -106,10 +106,14 @@ export default function Signup() {
       });
 
       // STEP 3: Send verification email
-      await sendEmailVerification(createdFirebaseUser);
+  // STEP 3: Send verification email
+await sendEmailVerification(createdFirebaseUser, {
+  url: 'https://accessibilitypro.onrender.com/verification',
+  handleCodeInApp: true,
+});
 
-      // STEP 4: Get Firebase ID Token
-      const token = await createdFirebaseUser.getIdToken();
+// STEP 4: Sign the user out until they verify their email
+await auth.signOut();
 
       // STEP 5: Save user profile into PostgreSQL backend
       try {
