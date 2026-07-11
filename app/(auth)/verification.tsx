@@ -9,13 +9,13 @@ import {
   Platform,
   ScrollView,
   ActivityIndicator,
-  Alert
+  Alert,
+  Image
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Ionicons } from '@expo/vector-icons';
 
 // Validation schema for manual OTP entry
 const verificationSchema = z.object({
@@ -109,9 +109,13 @@ export default function Verification() {
     >
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         
-        {/* Top Branding Layout */}
+        {/* Top Branding Layout with Custom Logo Asset */}
         <View style={styles.brandHeader}>
-          <Ionicons name="business" size={28} color="#007AFF" />
+          <Image 
+            source={{ uri: 'https://raw.githubusercontent.com/Gatesmogul/AccessibilityPro/main/assets/AccessibilityPro%20logo.png' }} 
+            style={styles.brandLogo}
+            resizeMode="contain"
+          />
           <Text style={styles.brandText}>AccessibilityPro</Text>
         </View>
 
@@ -195,11 +199,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 32,
   },
+  brandLogo: {
+    width: 28,
+    height: 28,
+  },
   brandText: {
     fontSize: 18,
     fontWeight: '700',
     color: '#007AFF',
-    marginLeft: 8,
+    marginLeft: 10,
   },
   title: {
     fontSize: 26,
